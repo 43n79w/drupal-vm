@@ -54,9 +54,14 @@ Vagrant.configure('2') do |config|
 
   # Networking configuration.
   config.vm.hostname = vconfig['vagrant_hostname']
-  config.vm.network :private_network,
-                    ip: vconfig['vagrant_ip'],
-                    auto_network: vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
+
+  # The Parallels provider by default sets up shared networking rendering
+  # host-only networking redundant
+  unless Vagrant.has_plugin?('vagrant-parallels') && vconfig['vagrant_ip'].empty?
+    config.vm.network :private_network,
+      ip: vconfig['vagrant_ip'],
+      auto_network: vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
+  end
 
   unless vconfig['vagrant_public_ip'].empty?
     config.vm.network :public_network,
